@@ -41,4 +41,4 @@ syft-generator-chart:
       kubernetesClientMasterUrl: "https://kubernetes.default.svc" 
       trustCerts: "false" # Should be false in prod, true in dev
     # Default internal cluster URL for storage
-    storageUrl: "http://sbomer-dev-manifest-storage-service:8085"
+    storageUrl: "http://sbomer-dev-manifest-storage-service-chart:8080"
