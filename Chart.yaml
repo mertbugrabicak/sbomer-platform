@@ -13,10 +13,10 @@ dependencies:
     version: 0.1.26
     repository: "oci://quay.io/sbomer"
   - name: syft-generator-chart
-    version: 0.1.16
+    version: 0.1.17
     repository: "oci://quay.io/sbomer"
   - name: java-generator-chart
-    version: 0.1.2
+    version: 0.1.3
     repository: "oci://quay.io/sbomer"
   - name: dela-generator-chart
     version: 0.1.1
