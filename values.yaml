@@ -197,6 +197,13 @@ syft-generator-chart:
   task:
     otel:
       endpoint: "http://sbomer-release-otel-lgtm:4318" # HTTP only
+    # Authentication Credentials for image registries
+    registryAuth:
+      # Enable mounting a custom dockerconfigjson secret
+      enabled: false
+      # The name of the kubernetes.io/dockerconfigjson secret in the same namespace
+      secretName: "syft-image-registry-credentials"
+
   config:
     otel:
       protocol: grpc
