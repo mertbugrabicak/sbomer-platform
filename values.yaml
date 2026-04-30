@@ -15,6 +15,11 @@ global:
   includeDependencyTrackPublisher: false
   includeOtelLgtm: true
 
+kueue:
+  enabled: true
+  resourceFlavor:
+    name: default-flavor
+
 wiremock:
   # Additional configmaps for wiremock can be attached by overriding this by the parent chart
   extraMappingConfigMaps: []
