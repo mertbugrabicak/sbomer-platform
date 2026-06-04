@@ -6,7 +6,8 @@
 # Span attributes (step.name + key=value pairs from otel_start_span) are inherited by child spans and logs.
 # Metrics use sbomer.taskrun.<category>.<measurement> naming, cumulative counter type, and only step.name as
 # datapoint attribute (not full span attributes) so metric labels stay within the set of Loki stream labels.
-# Required env vars: OTEL_SERVICE_NAME, OTEL_SERVICE_VERSION, OTEL_EXPORTER_OTLP_ENDPOINT, TRACEPARENT
+# Required env vars: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT, TRACEPARENT
+# Optional env vars: OTEL_SERVICE_VERSION (defaults to "unknown")
 
 # Resource attributes JSON array.
 # Called by otel_start_span.
@@ -26,8 +27,7 @@ otel_resource() {
 }
 
 # POSTs JSON payload to $OTEL_EXPORTER_OTLP_ENDPOINT/<path>.
-# Backgrounded (&) so script doesn't block waiting for OTel collector.
-# Uses --max-time 5 (seconds) as safety net to avoid hanging if OTel collector is slow.
+# Fire-and-forget: -s (silent) -f (fail on HTTP errors) --max-time 5s, backgrounded (&).
 # Args: path (e.g. v1/traces), json_payload
 otel_send() {
   curl -sf --max-time 5 -o /dev/null -X POST "${OTEL_EXPORTER_OTLP_ENDPOINT}/$1" -H "Content-Type: application/json" -d "$2" &
@@ -46,6 +46,7 @@ otel_attrs() {
 # Args: trace_id, span_id, parent_span_id, name, start_ns, end_ns, status_code (1=OK, 2=ERROR), [attrs_json]
 otel_send_span() {
   local span_json
+# || return 0 after jq: silently swallow build failures so telemetry never breaks the main script.
   span_json=$(jq -nc \
     --argjson resource "$OTEL_RESOURCE" \
     --arg trace_id "$1" \
@@ -190,7 +191,7 @@ otel_log() {
 # Uses Sum with cumulative temporality so exemplars are preserved in Prometheus/Mimir (gauge exemplars are dropped).
 # Exemplar on the real data point links to the current trace/span.
 # Only includes step.name as datapoint attribute (not full span attributes) so metric labels
-# stay within the set of Loki stream labels — Metrics Drilldown Related Logs requires ALL
+# stay within the set of Loki stream labels. Metrics Drilldown Related Logs requires ALL
 # metric labels to exist in Loki. High-cardinality span attributes (generation.id, image, etc.)
 # are available via exemplar -> trace drill-down and in log structured metadata.
 # Must be called after otel_start_span.
